@@ -31,13 +31,75 @@ Xiaohui Yao, PhD, PostDoc, Informatics in Biostatistics and Epidemiology
 
 ### Introduction 
 In the first paragraph, describe the problem addressed, its significance, and some background to motivate the problem.
-
 In the second paragraph, explain why your problem is interdisciplinary, what fields can contribute to its understanding, and incorporate background related to what you learned from meeting with faculty/staff.
+
+Alzheimer's disease (AD) has become one of the public health priorities for the 21st century. Recent studies have shown that AD is highly heritable, and over 20 AD-associated locis have been identified. There are studies using Genome-wide meta-analysis (GWAS) to analyse family history of Alzheimer's disease and identify new loci and functional pathways influencing Alzheimer's disease risk. There are summary statistics result of GWAS with 314,278 participants from UK Biobank (27,696 maternal cases, 14,338 paternal cases), and also GWAS of clinically diagnosed AD and AD-by-proxy (71,880 cases, 383,378 controls) in Europe. Aggregating the results from different studies is a step forward in identifying the genetic factors that contribute to AD risk based on a larger scale. Also, the possible difference between maternal and paternal AD history.
+
+AD is now the most frequent neurodegenerative disease, since about 35 million people have been diagosed. There are millions of clinical studies along with lab researches going on foucsing on AD. The data yield from clinical records and lab studies then requires effective analysis using statistics and informatics skills. Hypothesis can be proposed from the result of data analysis, and further experiment can be carried out in labs. Admittedly, the raw data in the open database could contain unneglectable noise, resulting in the potential biased outcome. Large sample size and sufficient experiment tests can help to develop the reliability of the result.
 
 
 ### Methods
 In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
 
+```{r}
+
+AD_sumstats_1 <- read.table(file = "1_UK_Biobank_maternal_17May2018.txt", #Name of file
+                header = TRUE, 
+                sep = " ", #Character that separates  column entries (tab, space, comma)
+                skip = 0, #Number of lines to skip from beginning
+                as.is = TRUE, #Should character variables be left alone 
+                na.strings = NA, #The encoding of missing values. Blanks are assumed missing too.
+                comment.char = "#", #Lines of file beginning with this character are ignored. (# default)
+                quote = "", #Character used to quote values. "" is no quotes.
+                nrows = -1 #The number of rows to read in. Negative/invalid values are ignored
+)
+
+AD_sumstats_2 <- read.table(file = "2_UK_Biobank_paternal_17May2018.txt", 
+                header = TRUE, 
+                sep = " ", 
+                skip = 0, 
+                as.is = TRUE,  
+                na.strings = NA, 
+                comment.char = "#",
+                quote = "", 
+                nrows = -1 
+)
+
+AD_sumstats_3 <- read.table(file = "3_UK_Biobank_parental_17May2018.txt", 
+                header = TRUE, 
+                sep = " ", 
+                skip = 0, 
+                as.is = TRUE, 
+                na.strings = NA, 
+                comment.char = "#", 
+                quote = "", 
+                nrows = -1 
+)
+
+AD_sumstats_4 <- read.table(file = "4_UK_Biobank_IGAP_17May2018.txt", 
+                header = TRUE, 
+                sep = " ", 
+                skip = 0, 
+                as.is = TRUE, 
+                na.strings = NA, 
+                comment.char = "#", 
+                quote = "", 
+                nrows = -1 
+)
+
+AD_sumstats_5 <- read.table(file = "AD_sumstats_Jansenetal.txt", 
+                header = TRUE, 
+                fill = TRUE,
+                sep = " ", 
+                skip = 0, 
+                as.is = TRUE, 
+                na.strings = NA, 
+                comment.char = "#", 
+                quote = "", 
+                nrows = -1 
+)
+
+```
 
 ### Results
 Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
