@@ -17,7 +17,16 @@ Use this template to complete your project throughout the course. Your Final Pro
 ### Overview
 In this section, give a brief a description of your project and its goal, what data you are using to complete it, and what three faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
 
-tryyyyyy
+There are studies using Genome-wide meta-analysis (GWAS) to analyse family history of Alzheimer's disease and identify new loci and functional pathways influencing Alzheimer's disease risk. However, the sample number of each study is under 500,000. By putting together data from 6 different studies, I plan to look into whether common conclusions could be drawn from them, and if there is difference when comparing maternal and paternal history.
+
+I will use data from 6 different studies posted on [GWAS Catalog](https://www.ebi.ac.uk/gwas/efotraits/EFO_0009268), with a sample number of 2,0008,882 in total.
+
+Three faculties:
+Blanca Himes, PhD, Assistant Professor, Informatics in Biostatistics and Epidemiology
+Shen Li, PhD, Professor, Informatics in Biostatistics and Epidemiology
+Xiaohui Yao, PhD, PostDoc, Informatics in Biostatistics and Epidemiology
+
+[Link to final project Github repository](https://github.com/shx0426/BMIN503_Final_Project)
 
 
 ### Introduction 
