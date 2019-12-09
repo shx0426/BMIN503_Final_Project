@@ -102,13 +102,6 @@ library(ggplot2)
 library(dplyr)
 
 
-
-NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
-NECTIN2
-
-AC011481.1 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "AC011481.1"), ]
-AC011481.1
-
 #select the samples that has p value less than 10^-6
 select_sumstats <- filter(AD_sumstats_1, AD_sumstats_1$P < 0.000001)
 select_sumstats <- rbind(select_sumstats, filter(AD_sumstats_2, AD_sumstats_2$P < 0.000001))
@@ -147,7 +140,7 @@ ggplot(AD_sumstats, aes(x = Mapped.gene))+
   geom_bar()
 ```
 
-Looking at the two most frequent mapped genes in the studies, 
+Looking at the two most frequent mapped genes in the studies, NECTIN2 and AC011481.1. NECTIN2 appeared 36 times with p value less than 1*10^-5, it even has 6 alleles that showing p value < 10^-100, which indicates NECTIN2 has high potential of relativeness to AD. AC011481.1 appeared 15 times, containing 3 alleles with p value < 10^-100. Both of the genes and those appeared more than 10 times, demonstrated the possible sites related to AD and could be future study focus.
 
 ```{r}
 NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
@@ -156,6 +149,8 @@ NECTIN2
 AC011481.1 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "AC011481.1"), ]
 AC011481.1
 ```
+
+
 
 ### Conclusion
 
