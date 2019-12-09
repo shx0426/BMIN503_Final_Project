@@ -41,6 +41,7 @@ AD is now the most frequent neurodegenerative disease, since about 35 million pe
 ### Methods
 In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
 
+
 ```{r}
 
 AD_sumstats_1 <- read.table(file = "1_UK_Biobank_maternal_17May2018.txt", #Name of file
@@ -116,16 +117,6 @@ AD_sumstats$P.value <- as.numeric(gsub("x10", "e", gsub("\\.", "", AD_sumstats$P
 AD_sumstats$Location <- as.numeric(gsub(":", ".", gsub("\\.", "", AD_sumstats$Location)))
 
 
-ggplot(AD_sumstats)+
-  geom_point(aes(x = Location, y = P.value), color = "red")+
-  scale_y_reverse()
-
-ggplot(AD_sumstats)+
-  geom_point(aes(x = Location, y = Mapped.gene), color = "red")
-
-ggplot(AD_sumstats, aes(x = Allele))+
-  geom_bar()
-
 ```
 
 ### Results
@@ -150,8 +141,16 @@ AC011481.1 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "AC011481.1"), ]
 AC011481.1
 ```
 
+The locations of where the frequent mapped genes are is another interesting point. The locations, which indicates which chromosome the gene is located, scattered in half of all the chromosomes. Chromosome 19, contains approximately 60% of the mapped genes, being the chromosome that has the largest nuber of genes related to AD. Other chromosomes also contains a number of genes that is not neglectable. Whether the scattered gene distribution is resulted by AD or mutiple gene function leads to AD remains unknown, but the frequent appeared genes are worth for further study of the relativeness with AD.
 
+```{r}
+ggplot(AD_sumstats)+
+  geom_point(aes(x = Location, y = Mapped.gene), color = "red")
+ggplot(AD_sumstats)+
+  geom_point(aes(x = Location, y = P.value), color = "red")+
+  scale_y_reverse()
+```
 
 ### Conclusion
 
-Using meta-analysis with published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 215 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
+Using published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 215 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
