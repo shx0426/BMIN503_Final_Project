@@ -1,6 +1,6 @@
 ---
-title: "BMIN503/EPID600 Project Template"
-author: "Your Name"
+title: "BMIN503/EPID600 Project - GWAS data analysis"
+author: "Haoxue Sun"
 output: 
   html_document:
     toc: false 
