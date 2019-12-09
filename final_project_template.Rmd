@@ -105,6 +105,8 @@ library(dplyr)
 
 #most frequent mapped gene
 rev(sort(table(AD_sumstats$Mapped.gene)))[1:5]
+ggplot(AD_sumstats, aes(x = Mapped.gene))+
+  geom_bar()
 
 NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
 NECTIN2
@@ -133,7 +135,8 @@ ggplot(AD_sumstats)+
 ggplot(AD_sumstats)+
   geom_point(aes(x = Location, y = Mapped.gene), color = "red")
 
-
+ggplot(AD_sumstats, aes(x = Allele))+
+  geom_bar()
 
 ```
 
@@ -141,4 +144,15 @@ ggplot(AD_sumstats)+
 Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
 
 
+The following 5 genes have been most frequently apppearing with a small p value (at least < 10^-5). Also a bar plot contains all the genes that has shown p value less than 10^-5 was drawn, among these genes the frequent apearing ones could be potential causative genes for AD, which worth further study.
 
+```{r}
+rev(sort(table(AD_sumstats$Mapped.gene)))[1:5]
+ggplot(AD_sumstats, aes(x = Mapped.gene))+
+  geom_bar()
+```
+
+
+### Conclusion
+
+Using meta-analysis with published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 215 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
