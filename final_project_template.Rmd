@@ -103,11 +103,6 @@ library(dplyr)
 
 
 
-#most frequent mapped gene
-rev(sort(table(AD_sumstats$Mapped.gene)))[1:5]
-ggplot(AD_sumstats, aes(x = Mapped.gene))+
-  geom_bar()
-
 NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
 NECTIN2
 
@@ -152,6 +147,15 @@ ggplot(AD_sumstats, aes(x = Mapped.gene))+
   geom_bar()
 ```
 
+Looking at the two most frequent mapped genes in the studies, 
+
+```{r}
+NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
+NECTIN2
+
+AC011481.1 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "AC011481.1"), ]
+AC011481.1
+```
 
 ### Conclusion
 
