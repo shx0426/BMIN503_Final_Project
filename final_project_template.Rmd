@@ -87,10 +87,9 @@ AD_sumstats_4 <- read.table(file = "4_UK_Biobank_IGAP_17May2018.txt",
                 nrows = -1 
 )
 
-AD_sumstats_5 <- read.table(file = "AD_sumstats_Jansenetal.txt", 
+AD_sumstats <- read.table(file = "GWAS data.txt", 
                 header = TRUE, 
-                fill = TRUE,
-                sep = " ", 
+                sep = "", 
                 skip = 0, 
                 as.is = TRUE, 
                 na.strings = NA, 
@@ -99,7 +98,47 @@ AD_sumstats_5 <- read.table(file = "AD_sumstats_Jansenetal.txt",
                 nrows = -1 
 )
 
+library(ggplot2)
+library(dplyr)
+
+
+
+#most frequent mapped gene
+rev(sort(table(AD_sumstats$Mapped.gene)))[1:5]
+
+NECTIN2 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "NECTIN2"), ]
+NECTIN2
+
+AC011481.1 <- AD_sumstats[which(AD_sumstats$Mapped.gene == "AC011481.1"), ]
+AC011481.1
+
+#select the samples that has p value less than 10^-6
+select_sumstats <- filter(AD_sumstats_1, AD_sumstats_1$P < 0.000001)
+select_sumstats <- rbind(select_sumstats, filter(AD_sumstats_2, AD_sumstats_2$P < 0.000001))
+
+#visualization of how many SNPs has p value less than 10^-6
+ggplot(select_sumstats)+
+  geom_point(aes(x = SNP, y = P), color = "blue")+
+  scale_y_reverse()
+
+AD_sumstats$Allele <- gsub("?", "", gsub("\\.", "", AD_sumstats$Allele))
+AD_sumstats$P.value <- as.numeric(gsub("x10", "e", gsub("\\.", "", AD_sumstats$P.value)))
+AD_sumstats$Location <- as.numeric(gsub(":", ".", gsub("\\.", "", AD_sumstats$Location)))
+
+
+ggplot(AD_sumstats)+
+  geom_point(aes(x = Location, y = P.value), color = "red")+
+  scale_y_reverse()
+
+ggplot(AD_sumstats)+
+  geom_point(aes(x = Location, y = Mapped.gene), color = "red")
+
+
+
 ```
 
 ### Results
 Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
+
+
+
