@@ -345,3 +345,4 @@ ggplot(AD_sumstats)+
 ### Conclusion
 
 The study identified several genes, including NECTIN2 and AC011481.1, as AD-associated loci that have known and putative biological processes associated with Alzheimer’s disease. In addition, loci ADAM10, BCKDK/KAT8 and ACE contain genes relevant for AD and neurodegeneration. Using published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 247 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
+
