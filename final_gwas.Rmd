@@ -1,5 +1,5 @@
 ---
-title: "BMIN503/EPID600 Project - GWAS data analysis"
+title: "GWAS data analysis of family history of Alzheimer's disease"
 author: "Haoxue Sun"
 output: 
   html_document:
@@ -12,14 +12,10 @@ output:
 options(width = 400)
 ```  
 ***
-Use this template to complete your project throughout the course. Your Final Project presentation in class will be based on the contents of this document. Replace the title/name and text below with your own, but keep the headers.
 
 ### Overview
-In this section, give a brief a description of your project and its goal, what data you are using to complete it, and what three faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
 
-There are studies using Genome-wide meta-analysis (GWAS) to analyse family history of Alzheimer's disease and identify new loci and functional pathways influencing Alzheimer's disease risk. However, the sample number of each study is under 500,000. By putting together data from 6 different studies, I plan to look into whether common conclusions could be drawn from them, and if there is difference when comparing maternal and paternal history.
-
-I will use data from 6 different studies posted on [GWAS Catalog](https://www.ebi.ac.uk/gwas/efotraits/EFO_0009268), with a sample number of 2,0008,882 in total.
+There are studies using Genome-wide meta-analysis (GWAS) to analyse family history of Alzheimer's disease and identify new loci and functional pathways influencing Alzheimer's disease risk. However, the sample number of each study is under 500,000. By putting together data from 6 different studies, I plan to look into whether common conclusions could be drawn from them, and if there is difference when comparing maternal and paternal history. I use data from 6 different studies posted on [GWAS Catalog](https://www.ebi.ac.uk/gwas/efotraits/EFO_0009268), with a sample number of 9,653,950 SNPs in total. The study identified several genes, including NECTIN2 and AC011481.1, as AD-associated loci that have known and putative biological processes associated with Alzheimer’s disease. Using published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 247 potential causative genes.
 
 Three faculties:
 Blanca Himes, PhD, Assistant Professor, Informatics in Biostatistics and Epidemiology
@@ -30,8 +26,6 @@ Xiaohui Yao, PhD, PostDoc, Informatics in Biostatistics and Epidemiology
 
 
 ### Introduction 
-In the first paragraph, describe the problem addressed, its significance, and some background to motivate the problem.
-In the second paragraph, explain why your problem is interdisciplinary, what fields can contribute to its understanding, and incorporate background related to what you learned from meeting with faculty/staff.
 
 Alzheimer's disease (AD) has become one of the public health priorities for the 21st century. Recent studies have shown that AD is highly heritable, and over 20 AD-associated locis have been identified. There are studies using Genome-wide meta-analysis (GWAS) to analyse family history of Alzheimer's disease and identify new loci and functional pathways influencing Alzheimer's disease risk. There are summary statistics result of GWAS with 314,278 participants from UK Biobank (27,696 maternal cases, 14,338 paternal cases), and also GWAS of clinically diagnosed AD and AD-by-proxy (71,880 cases, 383,378 controls) in Europe. Aggregating the results from different studies is a step forward in identifying the genetic factors that contribute to AD risk based on a larger scale. Also, the possible difference between maternal and paternal AD history.
 
@@ -39,7 +33,8 @@ AD is now the most frequent neurodegenerative disease, since about 35 million pe
 
 
 ### Methods
-In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
+
+Data from UK Biobank cohort and GWAS catalog were utilized to enlarge the total sample sacle. GWAS, also known as whole genome association study (WGA study, or WGAS), is an observational study of a genome-wide set of genetic variants in different individuals to see if any variant is associated with a trait. GWASs typically focus on associations between single-nucleotide polymorphisms (SNPs) and traits like major human diseases, but can equally be applied to any other genetic variants and any other organisms.
 
 
 ```{r}
@@ -101,7 +96,204 @@ AD_sumstats <- read.table(file = "GWAS data.txt",
 
 library(ggplot2)
 library(dplyr)
+library(lattice)
+manhattan.plot<-function(chr, pos, pvalue, 
+	sig.level=NA, annotate=NULL, ann.default=list(),
+	should.thin=T, thin.pos.places=2, thin.logp.places=2, 
+	xlab="Chromosome", ylab=expression(-log[10](p-value)),
+	col=c("gray","darkgray"), panel.extra=NULL, pch=20, cex=0.8,...) {
 
+	if (length(chr)==0) stop("chromosome vector is empty")
+	if (length(pos)==0) stop("position vector is empty")
+	if (length(pvalue)==0) stop("pvalue vector is empty")
+
+	#make sure we have an ordered factor
+	if(!is.ordered(chr)) {
+		chr <- ordered(chr)
+	} else {
+		chr <- chr[,drop=T]
+	}
+
+	#make sure positions are in kbp
+	if (any(pos>1e6)) pos<-pos/1e6;
+
+	#calculate absolute genomic position
+	#from relative chromosomal positions
+	posmin <- tapply(pos,chr, min);
+	posmax <- tapply(pos,chr, max);
+	posshift <- head(c(0,cumsum(posmax)),-1);
+	names(posshift) <- levels(chr)
+	genpos <- pos + posshift[chr];
+	getGenPos<-function(cchr, cpos) {
+		p<-posshift[as.character(cchr)]+cpos
+		return(p)
+	}
+
+	#parse annotations
+	grp <- NULL
+	ann.settings <- list()
+	label.default<-list(x="peak",y="peak",adj=NULL, pos=3, offset=0.5, 
+		col=NULL, fontface=NULL, fontsize=NULL, show=F)
+	parse.label<-function(rawval, groupname) {
+		r<-list(text=groupname)
+		if(is.logical(rawval)) {
+			if(!rawval) {r$show <- F}
+		} else if (is.character(rawval) || is.expression(rawval)) {
+			if(nchar(rawval)>=1) {
+				r$text <- rawval
+			}
+		} else if (is.list(rawval)) {
+			r <- modifyList(r, rawval)
+		}
+		return(r)
+	}
+
+	if(!is.null(annotate)) {
+		if (is.list(annotate)) {
+			grp <- annotate[[1]]
+		} else {
+			grp <- annotate
+		} 
+		if (!is.factor(grp)) {
+			grp <- factor(grp)
+		}
+	} else {
+		grp <- factor(rep(1, times=length(pvalue)))
+	}
+  
+	ann.settings<-vector("list", length(levels(grp)))
+	ann.settings[[1]]<-list(pch=pch, col=col, cex=cex, fill=col, label=label.default)
+
+	if (length(ann.settings)>1) { 
+		lcols<-trellis.par.get("superpose.symbol")$col 
+		lfills<-trellis.par.get("superpose.symbol")$fill
+		for(i in 2:length(levels(grp))) {
+			ann.settings[[i]]<-list(pch=pch, 
+				col=lcols[(i-2) %% length(lcols) +1 ], 
+				fill=lfills[(i-2) %% length(lfills) +1 ], 
+				cex=cex, label=label.default);
+			ann.settings[[i]]$label$show <- T
+		}
+		names(ann.settings)<-levels(grp)
+	}
+	for(i in 1:length(ann.settings)) {
+		if (i>1) {ann.settings[[i]] <- modifyList(ann.settings[[i]], ann.default)}
+		ann.settings[[i]]$label <- modifyList(ann.settings[[i]]$label, 
+			parse.label(ann.settings[[i]]$label, levels(grp)[i]))
+	}
+	if(is.list(annotate) && length(annotate)>1) {
+		user.cols <- 2:length(annotate)
+		ann.cols <- c()
+		if(!is.null(names(annotate[-1])) && all(names(annotate[-1])!="")) {
+			ann.cols<-match(names(annotate)[-1], names(ann.settings))
+		} else {
+			ann.cols<-user.cols-1
+		}
+		for(i in seq_along(user.cols)) {
+			if(!is.null(annotate[[user.cols[i]]]$label)) {
+				annotate[[user.cols[i]]]$label<-parse.label(annotate[[user.cols[i]]]$label, 
+					levels(grp)[ann.cols[i]])
+			}
+			ann.settings[[ann.cols[i]]]<-modifyList(ann.settings[[ann.cols[i]]], 
+				annotate[[user.cols[i]]])
+		}
+	}
+ 	rm(annotate)
+
+	#reduce number of points plotted
+	if(should.thin) {
+		thinned <- unique(data.frame(
+			logp=round(-log10(pvalue),thin.logp.places), 
+			pos=round(genpos,thin.pos.places), 
+			chr=chr,
+			grp=grp)
+		)
+		logp <- thinned$logp
+		genpos <- thinned$pos
+		chr <- thinned$chr
+		grp <- thinned$grp
+		rm(thinned)
+	} else {
+		logp <- -log10(pvalue)
+	}
+	rm(pos, pvalue)
+	gc()
+
+	#custom axis to print chromosome names
+	axis.chr <- function(side,...) {
+		if(side=="bottom") {
+			panel.axis(side=side, outside=T,
+				at=((posmax+posmin)/2+posshift),
+				labels=levels(chr), 
+				ticks=F, rot=0,
+				check.overlap=F
+			)
+		} else if (side=="top" || side=="right") {
+			panel.axis(side=side, draw.labels=F, ticks=F);
+		}
+		else {
+			axis.default(side=side,...);
+		}
+	 }
+
+	#make sure the y-lim covers the range (plus a bit more to look nice)
+	prepanel.chr<-function(x,y,...) { 
+		A<-list();
+		maxy<-ceiling(max(y, ifelse(!is.na(sig.level), -log10(sig.level), 0)))+.5;
+		A$ylim=c(0,maxy);
+		A;
+	}
+
+	xyplot(logp~genpos, chr=chr, groups=grp,
+		axis=axis.chr, ann.settings=ann.settings, 
+		prepanel=prepanel.chr, scales=list(axs="i"),
+		panel=function(x, y, ..., getgenpos) {
+			if(!is.na(sig.level)) {
+				#add significance line (if requested)
+				panel.abline(h=-log10(sig.level), lty=2);
+			}
+			panel.superpose(x, y, ..., getgenpos=getgenpos);
+			if(!is.null(panel.extra)) {
+				panel.extra(x,y, getgenpos, ...)
+			}
+		},
+		panel.groups = function(x,y,..., subscripts, group.number) {
+			A<-list(...)
+			#allow for different annotation settings
+			gs <- ann.settings[[group.number]]
+			A$col.symbol <- gs$col[(as.numeric(chr[subscripts])-1) %% length(gs$col) + 1]    
+			A$cex <- gs$cex[(as.numeric(chr[subscripts])-1) %% length(gs$cex) + 1]
+			A$pch <- gs$pch[(as.numeric(chr[subscripts])-1) %% length(gs$pch) + 1]
+			A$fill <- gs$fill[(as.numeric(chr[subscripts])-1) %% length(gs$fill) + 1]
+			A$x <- x
+			A$y <- y
+			do.call("panel.xyplot", A)
+			#draw labels (if requested)
+			if(gs$label$show) {
+				gt<-gs$label
+				names(gt)[which(names(gt)=="text")]<-"labels"
+				gt$show<-NULL
+				if(is.character(gt$x) | is.character(gt$y)) {
+					peak = which.max(y)
+					center = mean(range(x))
+					if (is.character(gt$x)) {
+						if(gt$x=="peak") {gt$x<-x[peak]}
+						if(gt$x=="center") {gt$x<-center}
+					}
+					if (is.character(gt$y)) {
+						if(gt$y=="peak") {gt$y<-y[peak]}
+					}
+				}
+				if(is.list(gt$x)) {
+					gt$x<-A$getgenpos(gt$x[[1]],gt$x[[2]])
+				}
+				do.call("panel.text", gt)
+			}
+		},
+		xlab=xlab, ylab=ylab, 
+		panel.extra=panel.extra, getgenpos=getGenPos, ...
+	);
+}
 
 #select the samples that has p value less than 10^-6
 select_sumstats <- filter(AD_sumstats_1, AD_sumstats_1$P < 0.000001)
@@ -115,13 +307,12 @@ ggplot(select_sumstats)+
 AD_sumstats$Allele <- gsub("?", "", gsub("\\.", "", AD_sumstats$Allele))
 AD_sumstats$P.value <- as.numeric(gsub("x10", "e", gsub("\\.", "", AD_sumstats$P.value)))
 AD_sumstats$Location <- as.numeric(gsub(":", ".", gsub("\\.", "", AD_sumstats$Location)))
-
+AD_sumstats <- AD_sumstats %>%
+  select(Allele, P.value, Mapped.gene, Location)
 
 ```
 
 ### Results
-Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
-
 
 The following 5 genes have been most frequently apppearing with a small p value (at least < 10^-5). Also a bar plot contains all the genes that has shown p value less than 10^-5 was drawn, among these genes the frequent apearing ones could be potential causative genes for AD, which worth further study.
 
@@ -153,4 +344,4 @@ ggplot(AD_sumstats)+
 
 ### Conclusion
 
-Using published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 215 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
+The study identified several genes, including NECTIN2 and AC011481.1, as AD-associated loci that have known and putative biological processes associated with Alzheimer’s disease. In addition, loci ADAM10, BCKDK/KAT8 and ACE contain genes relevant for AD and neurodegeneration. Using published consortium data and clinically diagnosed AD and AD-by-proxy data, 32 risk loci were identified in total, implicating 247 potential causative genes. By bringing together the results from different studies, the database was significantly enlarged. This helps us to further identify the genetic factors that contribute to AD risk based on a larger scale. The potential loci could be drug targets in the future exploration.
